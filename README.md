@@ -46,6 +46,7 @@ plotly.tools.set_credentials_file(username='your Plotly username', api_key='your
 `$ python3 movies_test.py`
 ### run the program
 `$ python3 movies.py`
+p.s. if do not want to use the provided caches, but to re-create them from beginning: delete those two cache files('..._cache.json') in the folder before run this python file
 ### choose command line options
 * **exit**
 <br> - description: exits the program
