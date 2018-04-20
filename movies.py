@@ -3,7 +3,7 @@
 # Section 004, Monday, 7pm
 
 ## Something about Caching:
-#if do not want to use provided caches, but to build them from beginning:
+#if do not want to use provided caches, but to re-create them from beginning:
 #       delete those two cache files('..._cache.json') in the folder before run this python file
 #if do not want to use caches at all:
 #       uncomment all the option B and comment all the option A in this script and then run it
