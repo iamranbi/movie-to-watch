@@ -2,22 +2,27 @@
 # Ran Bi
 # Section 004, Monday, 7pm
 
+## Something about Caching:
+#if do not want to use provided caches, but to build them from beginning:
+#       delete those two cache files('..._cache.json') in the folder before run this python file
+#if do not want to use caches at all:
+#       uncomment all the option B and comment all the option A in this script and then run it
+
 import re
 import requests
 import json
 from bs4 import BeautifulSoup
 import sqlite3
-import pandas as pd
 import webbrowser
+import pandas as pd
 from pandas import Series
-from prettytable import from_db_cursor #pip3 install PTable
-import plotly.plotly as py #pip3 install plotly
+from prettytable import from_db_cursor
+import plotly.plotly as py
 import plotly.graph_objs as go
 
 
-###################################################
-## Cache                                         ##
-###################################################
+## Define Class and Functions:
+
 CACHE_1='imdb_movies_cache.json'    #first-level cache
 CACHE_2='movies_dict_cache.json'    #second-level cache
 try:
@@ -56,8 +61,8 @@ class Movie:
         self.imdb_id=imdb_id
         ##crawl and scrape each movie's page
         movie_url='http://www.imdb.com/title/'+self.imdb_id
-        #if not use cache: movie_page=requests.get(movie_url).text
-        movie_page=make_request_using_cache(movie_url)
+        movie_page=make_request_using_cache(movie_url)    ##option A -- use cache
+        #movie_page=requests.get(movie_url).text          ##option B -- not use cache
         movie_soup=BeautifulSoup(movie_page, 'html.parser')
         #runtime
         self.runtime=movie_soup.find_all(itemprop='duration')[0].text.strip()
@@ -95,8 +100,8 @@ class Movie:
 def get_top_movies():
     #imdb top 250 movies
     baseurl='http://www.imdb.com/chart/top'
-    #if not use cache: re_page=requests.get(baseurl).text
-    re_page=make_request_using_cache(baseurl)
+    re_page=make_request_using_cache(baseurl)    ##option A -- use cache
+    #re_page=requests.get(baseurl).text          ##option B -- not use cache
     soup=BeautifulSoup(re_page, 'html.parser')
     soup_title=soup.find_all('td', {'class': 'titleColumn'})
     soup_rating=soup.find_all('td', {'class': 'ratingColumn imdbRating'})
@@ -140,11 +145,28 @@ def movies_to_dict(movies_list):
         movies_dict[i+1]=di
     return movies_dict
 
+def load_movies_dict_using_cache(dict_cache):
+    try:
+        with open(dict_cache) as infile:
+            movies_dict1=json.load(infile)
+        #load and convert the file
+        movies_dict={int(key): value for key, value in movies_dict1.items()}
+    except:
+        movies_list=get_top_movies()
+        movies_dict=movies_to_dict(movies_list)
+        with open(dict_cache, 'w') as outfile:
+            json.dump(movies_dict, outfile)
+    return movies_dict
+
 
 ###################################################
 ## Function -- init_db()                         ##
 ## create the datebase                           ##
 ## tables contained: movie and genre             ##
+## primary key: IMDb_ranking in table Movie      ##
+##              Id in table Genre                ##
+## foreign key: IMDb_ranking in table Genre      ##
+##       (related to IMDb_ranking in table Movie)##
 ###################################################
 def init_db():
     try:
@@ -157,7 +179,7 @@ def init_db():
     statement='''DROP TABLE IF EXISTS 'Genre';'''
     cur.execute(statement)
     conn.commit()
-    #create table 'Movie' (primary key:Ranking)
+    #create table 'Movie' (primary key: IMDb_ranking)
     st_create_movie= '''
         CREATE TABLE 'Movie' (
             'IMDb_ranking' INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
@@ -171,7 +193,7 @@ def init_db():
         '''
     cur.execute(st_create_movie)
     conn.commit()
-    #create table 'Genre' (primary key:Id; foreign key:Imdb_id)
+    #create table 'Genre' (primary key: Id)
     st_create_genre= '''
         CREATE TABLE 'Genre' (
             'Id' INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
@@ -236,7 +258,7 @@ def process_command(command):
     cur=conn.cursor()
     command_s=command.lower().split()
     if command_s[0]=='all':
-        st_c="SELECT IMDb_ranking, Title, IMDb_rating, Year, Runtime, Language FROM Movie"
+        st_c="SELECT IMDb_ranking, Title, IMDb_rating, Runtime, Language FROM Movie"
     if command_s[0]=='year':
         st_c="SELECT IMDb_ranking, Title, IMDb_rating, Runtime, Language FROM Movie WHERE Year='"
         st_c+=command_s[1]
@@ -302,21 +324,17 @@ def plot_genre_rating():
 
 
 
-## Create and Populate Database imdb_top_movies.sqlite
-try:
-    with open(CACHE_2) as infile:
-        movies_dict1=json.load(infile)
-    #load and convert the file
-    movies_dict={int(key): value for key, value in movies_dict1.items()}
-except:
-    movies_list=get_top_movies()
-    movies_dict=movies_to_dict(movies_list)
-    with open(CACHE_2, 'w') as outfile:
-        json.dump(movies_dict, outfile)
+## Create and Populate Database imdb_top_movies.sqlite:
+
+movies_dict=load_movies_dict_using_cache(CACHE_2)    ##option A -- use cache
+#movies_dict=movies_to_dict(get_top_movies())        ##option B -- not use cache
 init_db()
 insert_movies_data(movies_dict)
 
-## Main, interactive search interface
+
+
+## Interactive Search Interface:
+
 if __name__ == "__main__":
     response=''
     while True:
@@ -358,7 +376,7 @@ if __name__ == "__main__":
                 process_command(response)
                 print("\n")
             else:
-                print("No result found for "+response+"\n")
+                print("\n No result found for "+response+"\n")
         ##command option 3
         elif r[0]=='year' and len(r)==2:
             if r[1] in year_range:
@@ -366,7 +384,7 @@ if __name__ == "__main__":
                 process_command(response)
                 print("\n")
             else:
-                print("No result found for "+response+"\n")
+                print("\n No result found for "+response+"\n")
         ##command option 4
         elif r[0]=='watch' and len(r)==2:
             if r[1] in ranking_range:
@@ -377,7 +395,7 @@ if __name__ == "__main__":
                     print("\n Launching in web browser \n")
                     webbrowser.open(movie_trailer)
             else:
-                print("Command not recognized \n")
+                print("\n Command not recognized \n")
         ##command option 5
         elif r[0]=='visualization' and r[1]=='genre' and len(r)==3:
             if r[2]=='rating':
@@ -387,6 +405,6 @@ if __name__ == "__main__":
                 print("\n Launching the plotly page in web browser \n")
                 plot_genre_proportion()
             else:
-                print("Command not recognized \n")
+                print("\n Command not recognized \n")
         else:
-            print("Command not recognized \n")
+            print("\n Command not recognized \n")
