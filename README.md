@@ -36,7 +36,7 @@ plotly.tools.set_credentials_file(username='your Plotly username', api_key='your
 <br> - sample movies_dict: `{1: {"title": "The Shawshank Redemption", "year": "1994", "imdb_rating": "9.2", "imdb_id": "tt0111161", "runtime": "2h 22min", "genre": ["Crime", "Drama"], "language": "English", "trailer": "http://www.imdb.com/videoplayer/vi3877612057?playlistId=tt0111161&ref_=tt_ov_vi"},...}` 
 <br> - write out the dictionary to a file movies_dict_cache.json (second-level cache)    
 
-4. create datebase (imdb_top_movies.sqlite) and populate it
+4. create database (imdb_top_movies.sqlite) and populate it
 <br> - function: init_db(); insert_movies_data(movies_dict)
 <br> - database contains two tables: movie, genre
 <br> - when write data into database, load the dictionary movies_dict from movies_dict_cache.json to shorten the running time of the program
