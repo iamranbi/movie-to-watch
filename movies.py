@@ -1,7 +1,3 @@
-# SI 507 Final Project
-# Ran Bi
-# Section 004, Monday, 7pm
-
 ## Something about Caching:
 #if do not want to use provided caches, but to re-create them from beginning:
 #       delete those two cache files('..._cache.json') in the folder before run this python file
