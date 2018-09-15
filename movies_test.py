@@ -1,7 +1,3 @@
-# SI 507 Final Project
-# Ran Bi
-# Section 004, Monday, 7pm
-
 import unittest
 from movies import *
 
