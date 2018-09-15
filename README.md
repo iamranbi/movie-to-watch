@@ -1,4 +1,4 @@
-# SI507 Final Project
+# Movie Selector Project
 This project crawls and scrapes IMDb.com with the goal of aggregating top rated movies data. It provides an interactive command line prompt for users to select movies satisfying certain condition, see graphical charts of movie genres and watch related trailers.
 ## Data Sources
 IMDb: Highest Rated IMDb "Top 250"
